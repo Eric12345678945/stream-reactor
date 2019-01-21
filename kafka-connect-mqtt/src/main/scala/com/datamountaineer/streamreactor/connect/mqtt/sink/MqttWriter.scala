@@ -61,6 +61,7 @@ class MqttWriter(client: MqttClient, settings: MqttSinkSettings)
           //for all the records in the group transform
           records.map(r => {
             (k.getTarget,
+             r.key(),
                Transform(
                   k.getFields.map(FieldConverter.apply),
                   k.getIgnoredFields.map(FieldConverter.apply),
@@ -70,9 +71,10 @@ class MqttWriter(client: MqttClient, settings: MqttSinkSettings)
             ))
           }).map(
             {
-              case (t, json) => {
+              case (t, rk, json) => {
                 msg.setPayload(json.getBytes)
-                client.publish(t, msg)
+                // client.publish(t, msg)
+                client.publish(s"$rk".replaceAll("\"", ""), msg)
               }
             }
           )
