@@ -178,6 +178,8 @@ allprojects {
         compile "com.typesafe.scala-logging:scala-logging-slf4j_$scalaMajorVersion:$scalaLoggingVersion"
 
         compile ("org.apache.kafka:connect-json:$kafkaVersion")
+        compile "org.json4s:json4s-native_$scalaMajorVersion:$json4sVersion"
+        compile "org.json4s:json4s-jackson_$scalaMajorVersion:$json4sVersion"
         compile "io.confluent:kafka-connect-avro-converter:$confluentVersion"
         compile "io.confluent:kafka-schema-registry:$confluentVersion"
 

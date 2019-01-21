@@ -68,6 +68,9 @@ class MqttManager(connectionFn: (MqttSourceSettings) => MqttConnectOptions,
   }
 
   override def messageArrived(topic: String, message: MqttMessage): Unit = {
+    import org.json4s._
+    import org.json4s.native.JsonMethods._
+
     val matched = sourceToTopicMap
       .filter(t => checkTopic(topic, t._2))
       .map(t => t._2.getSource)
@@ -86,6 +89,14 @@ class MqttManager(connectionFn: (MqttSourceSettings) => MqttConnectOptions,
           val scalaList: Seq[String] = l
           scalaList
         }.getOrElse(Seq.empty[String])
+
+        // add mqtt topic in message payload
+        val jsonStr:String = new String(message.getPayload)
+        val jsonObject = parse(jsonStr)
+        val topicJsonObject = jsonObject merge JObject("topic" -> JString(topic))
+        val newJsonStr = compact(render(topicJsonObject))
+        message.setPayload(newJsonStr.getBytes)
+
         Option(converter.convert(kafkaTopic, topic, message.getId.toString, message.getPayload, keys, kcql.getKeyDelimeter)) match {
           case Some(record) =>
             queue.add(record)
